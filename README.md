@@ -1,5 +1,3 @@
-MSc Thesis – Survival Prediction and Clinical Analysis in Glioblastoma Patients Using Medical Imaging and Machine Learning
-
 This repository contains code and notebooks used in my MSc thesis project, focusing on survival prediction in glioblastoma patients through image analysis, clinical data, and machine learning. The dataset used is from The Cancer Imaging Archive (TCIA), and access must be requested through their platform.
 
 Repository Structure
