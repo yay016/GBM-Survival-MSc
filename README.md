@@ -29,3 +29,6 @@ This project uses sensitive medical imaging and clinical data available through 
 Request access to the dataset through TCIA.
 Download and organize the data according to the project’s expected structure.
 Note: Due to privacy restrictions, the dataset itself is not included in this repository.
+
+Users can install the dependencies by running:
+pip install -r requirements.txt
