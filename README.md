@@ -1,5 +1,7 @@
 This repository contains code and notebooks used in my MSc thesis project, focusing on survival prediction in glioblastoma patients through image analysis, clinical data, and machine learning. The dataset used is from The Cancer Imaging Archive (TCIA), and access must be requested through their platform.
 
+All GradCAM-plots are in the GradCAM folder. 
+
 Repository Structure
 
 3d_vis.py
@@ -19,6 +21,15 @@ Python script containing deep learning models for regression tasks (e.g., surviv
 
 structure_volume_extractor.py
 Utility script used to extract and analyze dose-volume and anatomical structure data from the patient DICOM files.
+
+dl-pfs-train.ipynb
+Notebook for deep learning PFS regression.
+
+dl-survival.ipynb
+Notebook for deep learning survival prediction. 
+
+dose_distribution_analysis_survival.py
+This code performs a voxel-wise comparative analysis of 3D radiation dose distributions between two patient groups (short vs. long survival after glioblastoma treatment), computing spatial dose statistics, significance maps, and summary metrics such as dose-falloff gradients and radii of gyration, and visualizing the results through plots saved to disk.
 
 Data Access
 
