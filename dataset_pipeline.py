@@ -1,16 +1,15 @@
-
 """
 This script implements a pipeline for processing multimodal DICOM data (CT, MR, and RT images). 
 It performs image registration, bias correction, resampling and croppin, ROI extraction, dose extraction, 
 and deep learning dataset preparation.
 """
-
+import cv2
 import os
 import re
 import logging
 from collections import OrderedDict
 from datetime import datetime
-
+import cv2
 import numpy as np
 import pandas as pd
 import pydicom
@@ -1118,13 +1117,9 @@ class GBMDataset3D_Survival(Dataset):
 
         # Definer funksjoner
         self.features = [
-            'AgeAtStudyDate', 'Sex', 'IDH1/2', 'MGMT', 'MaxDose',
-            'MeanDose', 'MeanDose_PTV_Gy', 'Brainstem', 'PrescriptionDose_Gy',
-            'NumberOfFractionsPlanned', 'PTV_to_Volume_Any_Dose_Ratio',
-            'PTV_Volume_cm3', 'DoseAboveThreshold'
+            'AgeAtStudyDate', 'Sex', 'IDH1/2', 'MGMT'
         ]
 
-        # Separér pasient-IDer og etiketter
         self.patient_ids = self.filtered_data['Patient_ID'].tolist()
         self.labels = self.filtered_data['Survived_Over_600_Days'].tolist()
         
@@ -1150,9 +1145,7 @@ class GBMDataset3D_Survival(Dataset):
         if self.verbose:
             print("Imputation of numerical features...")
         numerical_features = [
-            'AgeAtStudyDate', 'MaxDose', 'MeanDose', 'MeanDose_PTV_Gy',
-            'Brainstem', 'PrescriptionDose_Gy', 'NumberOfFractionsPlanned',
-            'PTV_to_Volume_Any_Dose_Ratio', 'PTV_Volume_cm3', 'DoseAboveThreshold'
+            'AgeAtStudyDate'
         ]
         self.additional_features[numerical_features] = self.additional_features[numerical_features].fillna(
             self.additional_features[numerical_features].median()
@@ -1171,9 +1164,7 @@ class GBMDataset3D_Survival(Dataset):
         if self.verbose:
             print("Normalizing numerical features...")
         numerical_features = [
-            'AgeAtStudyDate', 'MaxDose', 'MeanDose', 'MeanDose_PTV_Gy',
-            'Brainstem', 'PrescriptionDose_Gy', 'NumberOfFractionsPlanned',
-            'PTV_to_Volume_Any_Dose_Ratio', 'PTV_Volume_cm3', 'DoseAboveThreshold'
+            'AgeAtStudyDate'
         ]
         # Normalize the numerical features
         for feature in numerical_features:
@@ -1261,7 +1252,7 @@ class GBMDataset3D_Survival(Dataset):
 
         dose_mean = dose_volume.mean()
         dose_std = dose_volume.std()
-        dose_volume = (dose_volume - dose_mean) / (dose_std + 1e-8)
+        #dose_volume = (dose_volume - dose_mean) / (dose_std + 1e-8)
 
         # Stack the volumes to create the input image
         image = np.stack([mr_t1_volume, mr_t2_volume, dose_volume], axis=0)  # Shape: (3, num_slices, 256, 256)
@@ -1383,7 +1374,7 @@ class GBMDataset3D_PFS(Dataset):
             else:
                 self.additional_features[feature] = self.additional_features[feature] - mean  # Hvis std er 0
 
-    def _select_top_connected_slices(self, dose_volume, num_slices=64):
+    def _select_top_connected_slices(self, dose_volume, num_slices=100):
         """
         Selects a contiguous window of slices with the highest total dose.
 
@@ -1457,15 +1448,15 @@ class GBMDataset3D_PFS(Dataset):
         # Normalize the image volumes 
         mr_t2_mean = mr_t2_volume.mean()
         mr_t2_std = mr_t2_volume.std()
-        mr_t2_volume = (mr_t2_volume - mr_t2_mean) / (mr_t2_std + 1e-8)
+        mr_t2_volume = (mr_t2_volume - mr_t2_mean) / (mr_t2_std + 1e-9)
 
         mr_t1_mean = mr_t1_volume.mean()
         mr_t1_std = mr_t1_volume.std()
-        mr_t1_volume = (mr_t1_volume - mr_t1_mean) / (mr_t1_std + 1e-8)
+        mr_t1_volume = (mr_t1_volume - mr_t1_mean) / (mr_t1_std + 1e-9)
 
         dose_mean = dose_volume.mean()
         dose_std = dose_volume.std()
-        dose_volume = (dose_volume - dose_mean) / (dose_std + 1e-8)
+        dose_volume = (dose_volume - dose_mean) / (dose_std + 1e-9)
 
         # Hent dose-relaterte variabler fra DoseLoaderCache
         dose_loader = self.dose_loader_cache.get(patient_id)
@@ -1490,7 +1481,6 @@ class GBMDataset3D_PFS(Dataset):
             volume_above_95_percent_dose
         ], dtype=torch.float32)
         # Initialiser DoseLoaderCache
-        # Konverter dose_features til numpy array
         # Stack the volumes to create the input image
         image = np.stack([mr_t1_volume, mr_t2_volume, dose_volume], axis=0)  # Shape: (3, num_slices, 256, 256)
 
@@ -1515,26 +1505,46 @@ class GBMDataset3D_PFS(Dataset):
 
         return sample
 
-
 class Plotter:
-    def __init__(self, processor, verbose=False):
+    def __init__(self, processor, verbose=False, target_resolution=None):
         """
         Initialiserer Plotter med en DICOMProcessor-instans.
-
+        
         Parameters:
-        - processor (DICOMProcessor): En instans av DICOMProcessor som inneholder bildedata.
-        - verbose (bool): Hvis True, viser detaljerte utskrifter.
+          - processor (DICOMProcessor): En instans av DICOMProcessor som inneholder bildedata.
+          - verbose (bool): Hvis True, viser detaljerte utskrifter.
+          - target_resolution (tuple or None): Hvis satt til (width, height) (f.eks. (256,256)), 
+            vil hver slice bli resized før plotting.
         """
         self.processor = processor
         self.verbose = verbose
+        self.target_resolution = target_resolution
     
+    def _resize_if_needed(self, image):
+        """Hjelpefunksjon for å resize bildet dersom target_resolution er satt."""
+        if self.target_resolution is not None:
+            # Check if image is valid and non-empty
+            if image is None or not hasattr(image, 'shape') or image.size == 0:
+                if self.verbose:
+                    print("Warning: image is empty or invalid, skipping resizing.")
+                return image
+            try:
+                # Ensure target_resolution is in the expected (width, height) format as integers.
+                target_res = (int(self.target_resolution[0]), int(self.target_resolution[1]))
+                return cv2.resize(image, target_res, interpolation=cv2.INTER_LINEAR)
+            except Exception as e:
+                if self.verbose:
+                    print("Error during resizing:", e)
+                return image
+        return image
+
     def plot_ct_slice(self, slice_idx, ax=None):
         """
         Plotter CT-slice ved spesifisert indeks.
-
+        
         Parameters:
-        - slice_idx (int): Indeksen til slice som skal plottes.
-        - ax (matplotlib.axes.Axes, optional): Akse hvor plottet skal tegnes. Hvis None, opprettes en ny akse.
+          - slice_idx (int): Indeksen til slice som skal plottes.
+          - ax (matplotlib.axes.Axes, optional): Akse hvor plottet skal tegnes. Hvis None, opprettes en ny akse.
         """
         if ax is None:
             fig, ax = plt.subplots(1, 1, figsize=(5,5))
@@ -1542,9 +1552,11 @@ class Plotter:
         ct = self.processor.ct_array
         if ct is not None:
             if 0 <= slice_idx < ct.shape[0]:
-                ax.imshow(ct[slice_idx, :, :], cmap='gray')
+                img = ct[slice_idx, :, :]
+                img = self._resize_if_needed(img)
+                ax.imshow(img, cmap='gray')
                 if self.verbose:
-                    print(f"Plottet CT slice {slice_idx} med shape {ct[slice_idx].shape}")
+                    print(f"Plottet CT slice {slice_idx} med shape {img.shape}")
             else:
                 ax.text(0.5, 0.5, f'CT slice {slice_idx} out of range', 
                         horizontalalignment='center', verticalalignment='center')
@@ -1560,10 +1572,10 @@ class Plotter:
     def plot_mr_t1_slice(self, slice_idx, ax=None):
         """
         Plotter MR T1-slice ved spesifisert indeks.
-
+        
         Parameters:
-        - slice_idx (int): Indeksen til slice som skal plottes.
-        - ax (matplotlib.axes.Axes, optional): Akse hvor plottet skal tegnes. Hvis None, opprettes en ny akse.
+          - slice_idx (int): Indeksen til slice som skal plottes.
+          - ax (matplotlib.axes.Axes, optional): Akse hvor plottet skal tegnes. Hvis None, opprettes en ny akse.
         """
         if ax is None:
             fig, ax = plt.subplots(1, 1, figsize=(5,5))
@@ -1571,9 +1583,11 @@ class Plotter:
         mr_t1 = self.processor.registered_mr_t1_array
         if mr_t1 is not None:
             if 0 <= slice_idx < mr_t1.shape[0]:
-                ax.imshow(mr_t1[slice_idx, :, :], cmap='gray')
+                img = mr_t1[slice_idx, :, :]
+                img = self._resize_if_needed(img)
+                ax.imshow(img, cmap='gray')
                 if self.verbose:
-                    print(f"Plottet MR T1 slice {slice_idx} med shape {mr_t1[slice_idx].shape}")
+                    print(f"Plottet MR T1 slice {slice_idx} med shape {img.shape}")
             else:
                 ax.text(0.5, 0.5, f'MR T1 slice {slice_idx} out of range', 
                         horizontalalignment='center', verticalalignment='center')
@@ -1589,10 +1603,10 @@ class Plotter:
     def plot_mr_t2_slice(self, slice_idx, ax=None):
         """
         Plotter MR T2-slice ved spesifisert indeks.
-
+        
         Parameters:
-        - slice_idx (int): Indeksen til slice som skal plottes.
-        - ax (matplotlib.axes.Axes, optional): Akse hvor plottet skal tegnes. Hvis None, opprettes en ny akse.
+          - slice_idx (int): Indeksen til slice som skal plottes.
+          - ax (matplotlib.axes.Axes, optional): Akse hvor plottet skal tegnes. Hvis None, opprettes en ny akse.
         """
         if ax is None:
             fig, ax = plt.subplots(1, 1, figsize=(5,5))
@@ -1600,9 +1614,11 @@ class Plotter:
         mr_t2 = self.processor.registered_mr_array
         if mr_t2 is not None:
             if 0 <= slice_idx < mr_t2.shape[0]:
-                ax.imshow(mr_t2[slice_idx, :, :], cmap='gray')
+                img = mr_t2[slice_idx, :, :]
+                img = self._resize_if_needed(img)
+                ax.imshow(img, cmap='gray')
                 if self.verbose:
-                    print(f"Plottet MR T2 slice {slice_idx} med shape {mr_t2[slice_idx].shape}")
+                    print(f"Plottet MR T2 slice {slice_idx} med shape {img.shape}")
             else:
                 ax.text(0.5, 0.5, f'MR T2 slice {slice_idx} out of range', 
                         horizontalalignment='center', verticalalignment='center')
@@ -1614,37 +1630,38 @@ class Plotter:
             if self.verbose:
                 print("MR T2 array er None")
         ax.axis('off')
-
+    
     def plot_dose_slice(self, slice_idx, ax=None):
         """
         Plots Dose slice at the specified index with correct scaling.
-
+        
         Parameters:
-        - slice_idx (int): Index of the slice to plot.
-        - ax (matplotlib.axes.Axes, optional): Axes where the plot will be drawn. If None, a new axes is created.
+          - slice_idx (int): Index of the slice to plot.
+          - ax (matplotlib.axes.Axes, optional): Axes where the plot will be drawn. If None, a new axes is created.
         """
         if ax is None:
             fig, ax = plt.subplots(1, 1, figsize=(6,6))
         
         dose = self.processor.dose_array
-        dose_grid_scaling = getattr(self.processor, 'dose_grid_scaling', 1.0)  # Ensure scaling factor is available
+        dose_grid_scaling = getattr(self.processor, 'dose_grid_scaling', 1.0)
 
         if dose is not None:
             if 0 <= slice_idx < dose.shape[0]:
                 dose_scaled = dose[slice_idx, :, :] * dose_grid_scaling
+                # Optionally resize the dose slice
+                dose_scaled = self._resize_if_needed(dose_scaled)
                 im = ax.imshow(dose_scaled, cmap='jet')
                 dose_units = getattr(self.processor, 'dose_units', 'Dose (Gy)')
                 cbar = ax.figure.colorbar(im, ax=ax, fraction=0.046, pad=0.04)
                 cbar.set_label(dose_units)
                 
-                # Beregn min og maks for dose, rund ned/opp til nærmeste tideler
                 tick_min = np.floor(dose_scaled.min() / 10) * 10
                 tick_max = np.ceil(dose_scaled.max() / 10) * 10
                 ticks = np.arange(tick_min, tick_max, 10)
                 cbar.set_ticks(ticks)
                 
                 if self.verbose:
-                    print(f"Plotted Dose slice {slice_idx} with shape {dose[slice_idx].shape}")
+                    print(f"Plotted Dose slice {slice_idx} with shape {dose_scaled.shape}")
             else:
                 ax.text(0.5, 0.5, f'Dose slice {slice_idx} out of range', 
                         horizontalalignment='center', verticalalignment='center', transform=ax.transAxes)
