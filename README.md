@@ -1,10 +1,8 @@
-# Survival Prediction in Glioblastoma
+# 🧠 Survival Prediction in Glioblastoma
+This repository contains code, plots and notebooks from my MSc thesis project on AI-based prediction of glioblastoma progression and patient survival following radiotherapy. The work integrates image analysis, clinical data, and machine learning to model and analyse survival outcomes. The dataset is sourced from **The Cancer Imaging Archive (TCIA)** and requires approved access through their platform.
 
-This repository contains code and notebooks used in my MSc thesis project, focusing on survival prediction in glioblastoma patients through image analysis, clinical data, and machine learning. The dataset is sourced from **The Cancer Imaging Archive (TCIA)** and requires access approval through their platform.
-
-## Repository Structure
-
-- `3d_vis.py`  
+## 📁 Repository Structure
+- `image_vis.py`  
   Script for visualizing image registration results. When run, it opens a graphical interface allowing selection of patient, modality, and image processing options.
 
 - `clinical_analysis_ML_survival.ipynb`  
@@ -17,7 +15,7 @@ This repository contains code and notebooks used in my MSc thesis project, focus
   Deep learning models for classification tasks (e.g., binary survival prediction).
 
 - `models_regression.py`  
-  Deep learning models for regression tasks (e.g., survival time prediction).
+  Deep learning models for regression tasks (e.g., continious survival time prediction).
 
 - `structure_volume_extractor.py`  
   Script to extract and analyze dose-volume and anatomical structure data from patient DICOM files.
@@ -34,7 +32,7 @@ This repository contains code and notebooks used in my MSc thesis project, focus
 - `GradCamPlots/`  
   Contains all Grad-CAM visualizations generated during model evaluation.
 
-## Data Access
+## 🔐 Data Access
 
 This project uses sensitive clinical and imaging data from TCIA. To use the code:
 
@@ -73,7 +71,7 @@ Set the `base_path` parameter in your scripts to the root dataset directory:
 ```python
 base_path = "Burdenko-GBM-Progression"
 ```
-## 🧪Example Usage
+## 💡 Example Usage
 To process and load data for a specific patient:
 ```python
 processor = DICOMProcessor(patient_id="Burdenko-GBM-001", base_path="Burdenko-GBM-Progression")
