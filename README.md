@@ -41,7 +41,43 @@ This project uses sensitive clinical and imaging data from TCIA. To use the code
 1. Request access to the dataset through [TCIA](https://www.cancerimagingarchive.net/).
 2. Download and organize the data according to the expected folder structure.
 
->  **Note:** Due to privacy restrictions, the dataset is not included in this repository.
+## 📂 Directory Structure
+
+The code expects the dataset to follow the structure used in the **Burdenko Glioblastoma Progression** collection from TCIA. After downloading and extracting the data, it should be organized as follows:
+Burdenko-GBM-Progression/
+├── Burdenko-GBM-001/
+│ └── Radiotherapy planning/
+│ ├── CT Series/
+│ ├── MR T2FLAIR Series/
+│ ├── MR CET1 Series/
+│ ├── RTSTRUCT/
+│ ├── RTPLAN/
+│ └── RTDOSE/
+├── Burdenko-GBM-002/
+│ └── Radiotherapy planning/
+│ └── ...
+└── ...
+
+Each patient folder (e.g., `Burdenko-GBM-001`) must include a subdirectory named `Radiotherapy planning/`, containing separate series or folders for:
+- **CT**
+- **MR T2FLAIR**
+- **MR CET1**
+- **RTSTRUCT**
+- **RTPLAN**
+- **RTDOSE**
+
+Set the `base_path` parameter in your scripts to the root dataset directory:
+
+```python
+base_path = "Burdenko-GBM-Progression"
+```
+## 🧪Example Usage
+To process and load data for a specific patient:
+```python
+processor = DICOMProcessor(patient_id="Burdenko-GBM-001", base_path="Burdenko-GBM-Progression")
+processor.load_all_data()
+```
+>📌**Note:** Due to privacy restrictions, the dataset is not included in this repository.
 
 ## Installation
 
