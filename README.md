@@ -79,7 +79,7 @@ processor.load_all_data()
 ```
 >📌**Note:** Due to privacy restrictions, the dataset is not included in this repository.
 
-## Installation
+## ⚙️ Installation
 
 To install the required dependencies, run:
 
