@@ -1,43 +1,51 @@
-This repository contains code and notebooks used in my MSc thesis project, focusing on survival prediction in glioblastoma patients through image analysis, clinical data, and machine learning. The dataset used is from The Cancer Imaging Archive (TCIA), and access must be requested through their platform.
+# MSc Thesis – Survival Prediction in Glioblastoma
 
-All GradCAM-plots are in the GradCAM folder. 
+This repository contains code and notebooks used in my MSc thesis project, focusing on survival prediction in glioblastoma patients through image analysis, clinical data, and machine learning. The dataset is sourced from **The Cancer Imaging Archive (TCIA)** and requires access approval through their platform.
 
-Repository Structure
+## 📁 Repository Structure
 
-3d_vis.py
-A script for visualizing image registration results. When run, it opens a graphical interface where the user can select a patient, imaging modality, and image processing options.
+- `3d_vis.py`  
+  Script for visualizing image registration results. When run, it opens a graphical interface allowing selection of patient, modality, and image processing options.
 
-clinical_analysis_ML_survival.ipynb
-Jupyter notebook containing overall survival (OS) analysis and a machine learning pipeline for survival prediction based on clinical and imaging-derived features.
+- `clinical_analysis_ML_survival.ipynb`  
+  Jupyter notebook for analyzing overall survival (OS) and running machine learning pipelines using clinical and imaging-derived features.
 
-dataset_pipeline.py
-Utility functions for dataset construction and preprocessing. This script is used in the notebook preprocess.ipynb to prepare data for analysis and modeling.
+- `dataset_pipeline.py`  
+  Utility functions for dataset construction and preprocessing. Used in `preprocess.ipynb` to prepare data for analysis and modeling.
 
-models_classification.py
-Python script containing deep learning models for classification tasks (e.g., binary survival prediction).
+- `models_classification.py`  
+  Deep learning models for classification tasks (e.g., binary survival prediction).
 
-models_regression.py
-Python script containing deep learning models for regression tasks (e.g., survival time prediction).
+- `models_regression.py`  
+  Deep learning models for regression tasks (e.g., survival time prediction).
 
-structure_volume_extractor.py
-Utility script used to extract and analyze dose-volume and anatomical structure data from the patient DICOM files.
+- `structure_volume_extractor.py`  
+  Script to extract and analyze dose-volume and anatomical structure data from patient DICOM files.
 
-dl-pfs-train.ipynb
-Notebook for deep learning PFS regression.
+- `dl-pfs-train.ipynb`  
+  Notebook for deep learning-based progression-free survival (PFS) regression.
 
-dl-survival.ipynb
-Notebook for deep learning survival prediction. 
+- `dl-survival.ipynb`  
+  Notebook for deep learning-based survival prediction.
 
-dose_distribution_analysis_survival.py
-This code performs a voxel-wise comparative analysis of 3D radiation dose distributions between two patient groups (short vs. long survival after glioblastoma treatment), computing spatial dose statistics, significance maps, and summary metrics such as dose-falloff gradients and radii of gyration, and visualizing the results through plots saved to disk.
+- `dose_distribution_analysis_survival.py`  
+  Voxel-wise comparative analysis of 3D radiation dose distributions between short- and long-survival patient groups. Computes spatial dose statistics, significance maps, and summary metrics such as dose-falloff gradients and radii of gyration. Results are saved as plots.
 
-Data Access
+- `GradCAM/`  
+  Contains all Grad-CAM visualizations generated during model evaluation.
 
-This project uses sensitive medical imaging and clinical data available through TCIA. To use the code, you must:
+## 📦 Data Access
 
-Request access to the dataset through TCIA.
-Download and organize the data according to the project’s expected structure.
-Note: Due to privacy restrictions, the dataset itself is not included in this repository.
+This project uses sensitive clinical and imaging data from TCIA. To use the code:
 
-Users can install the dependencies by running:
+1. Request access to the dataset through [TCIA](https://www.cancerimagingarchive.net/).
+2. Download and organize the data according to the expected folder structure.
+
+>  **Note:** Due to privacy restrictions, the dataset is not included in this repository.
+
+## Installation
+
+To install the required dependencies, run:
+
+```bash
 pip install -r requirements.txt
