@@ -44,7 +44,22 @@ This project uses sensitive clinical and imaging data from TCIA. To use the code
 ## 📂 Directory Structure
 
 The code expects the dataset to follow the structure used in the **Burdenko Glioblastoma Progression** collection from TCIA. After downloading and extracting the data, it should be organized as follows:
-<pre> <code> Burdenko-GBM-Progression/ ├── Burdenko-GBM-001/ │ └── Radiotherapy planning/ │ ├── CT/ │ ├── MR T2FLAIR/ │ ├── MR CET1/ │ ├── RTSTRUCT/ │ ├── RTPLAN/ │ └── RTDOSE/ ├── Burdenko-GBM-002/ │ └── Radiotherapy planning/ │ └── ... └── ... </code> </pre>
+
+```text
+Burdenko-GBM-Progression/
+├── Burdenko-GBM-001/
+│   └── Radiotherapy planning/
+│       ├── CT/
+│       ├── MR T2FLAIR/
+│       ├── MR CET1/
+│       ├── RTSTRUCT/
+│       ├── RTPLAN/
+│       └── RTDOSE/
+├── Burdenko-GBM-002/
+│   └── Radiotherapy planning/
+│       └── ...
+└── ...
+```
 Each patient folder (e.g., `Burdenko-GBM-001`) must include a subdirectory named `Radiotherapy planning/`, containing separate series or folders for:
 - **CT**
 - **MR T2FLAIR**
