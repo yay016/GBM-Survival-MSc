@@ -1,8 +1,8 @@
-# MSc Thesis – Survival Prediction in Glioblastoma
+# Survival Prediction in Glioblastoma
 
 This repository contains code and notebooks used in my MSc thesis project, focusing on survival prediction in glioblastoma patients through image analysis, clinical data, and machine learning. The dataset is sourced from **The Cancer Imaging Archive (TCIA)** and requires access approval through their platform.
 
-## 📁 Repository Structure
+## Repository Structure
 
 - `3d_vis.py`  
   Script for visualizing image registration results. When run, it opens a graphical interface allowing selection of patient, modality, and image processing options.
@@ -31,10 +31,10 @@ This repository contains code and notebooks used in my MSc thesis project, focus
 - `dose_distribution_analysis_survival.py`  
   Voxel-wise comparative analysis of 3D radiation dose distributions between short- and long-survival patient groups. Computes spatial dose statistics, significance maps, and summary metrics such as dose-falloff gradients and radii of gyration. Results are saved as plots.
 
-- `GradCAM/`  
+- `GradCamPlots/`  
   Contains all Grad-CAM visualizations generated during model evaluation.
 
-## 📦 Data Access
+## Data Access
 
 This project uses sensitive clinical and imaging data from TCIA. To use the code:
 
