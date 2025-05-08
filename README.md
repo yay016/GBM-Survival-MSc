@@ -4,6 +4,8 @@ This repository contains code, plots and notebooks from my MSc thesis project on
 ## 📁 Repository Structure
 - `image_vis.py`  
   Script for visualizing image registration results. When run, it opens a graphical interface allowing selection of patient, modality, and image processing options.
+- `3d_vis.py`  
+  Script for visualizing images in 3D with Plotly. 
 
 - `clinical_analysis_ML_survival.ipynb`  
   Jupyter notebook for analyzing overall survival (OS) and running machine learning pipelines using clinical and imaging-derived features.
@@ -30,7 +32,7 @@ This repository contains code, plots and notebooks from my MSc thesis project on
   Voxel-wise comparative analysis of 3D radiation dose distributions between short- and long-survival patient groups. Computes spatial dose statistics, significance maps, and summary metrics such as dose-falloff gradients and radii of gyration. Results are saved as plots.
 
 - `GradCamPlots/`  
-  Contains all Grad-CAM visualizations generated during model evaluation.
+  Contains all Grad-CAM visualizations generated during OS model evaluation.
 
 ## 🔐 Data Access
 
